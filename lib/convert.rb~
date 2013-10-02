@@ -1,0 +1,20 @@
+require 'fileCheck'
+class Convert
+
+
+ def file_read
+     
+    x = IO.readlines('test_file.fasta')
+    x.shift
+    y = x.join()
+    w = y.delete "\n"
+
+
+ end
+
+
+
+
+
+
+end
