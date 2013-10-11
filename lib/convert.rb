@@ -5,7 +5,7 @@ class Convert
  def file_read
      
     x = IO.readlines('test_file.fasta')
-    x.class #String
+    x.class #Array
     x.shift
     y = x.join()
     y.class #String
