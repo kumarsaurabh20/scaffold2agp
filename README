@@ -1,2 +1,10 @@
-A ruby based interactive command line application to convert a fasta formatted scaffold file, mapped contigs on a reference genome
-with fixed gaps, in to a .AGP file. AGP file is required during genome submission at NCBI GenBank.
+A ruby based interactive command line application to convert fasta formatted scaffold file(generated from CONTIGuator
+tool) to .agp file required for NCBI genome submissions. 
+
+It requires a fasta file having a scaffold (single scaffold assembled from mapped contigs) having gaps which separates
+contigs. Gaps could be of fixed length or variable. The app also requires a CONTIGuator mapped contigs file for fetching
++/- contig orientation information. 
+
+Single scaffold limitation would be resolved in future versions of the program. 
+
+Just initialize the init.rb file and get your .agp file ready for NCBI submissions.  
