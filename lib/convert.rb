@@ -3,6 +3,7 @@ class Convert
 
 
  def file_read
+    
     # variables
     version = "agp-version	2.0"
     organism = "Halochloris"
@@ -43,12 +44,12 @@ class Convert
 
 
         x = IO.readlines('mira_output_contiguator_scaffold.fasta')
-	    #x.class #Array
+	#x.class #Array
 	label = x.shift
 	
 
         y = x.join()
-	    #y.class #String
+	#y.class #String
 	w = y.delete "\n"
 	contigs = w.split(/[N]+/)
 	#contigs.class #array
@@ -60,29 +61,25 @@ class Convert
 	 scaffold_base_count = 0
          contig_id = []
          contig_beg = []
-         contig_end = []
-
-         gaps = q.scan(/[n]+/)  #creates array of string that matches the pattern
-
+         contig_end = []  
          posn = []
-         gaps.each do |gap|
-
+         gap_end = []
+   
+      #gaps = q.scan(/[n]+/)  #creates array of string that matches the pattern
+      q.scan(/[n]+/) do |gap|
          posn << q.index(gap)
-         count = 
+	 gap_end << "#{q.index(gap)}".to_i + "#{gap}".length.to_i - 1
          q = q.sub(gap, "N" * gap.length)
-         end
+      end
 
-         contigs.each do |con|
-         contig_beg << w.index(con)
-         end
+      contigs.each do |con|
+      	contig_beg << w.index(con)
+      end
 
-      
       for i in 1..contigs.length 
-
          contig_id << "#{assembly_name}#{tax_id}"+"_" +"#{i}"
          n = i - 1
-         contig_end << contig_beg[n].to_i + "#{contigs[n]}".length.to_i - 1
-          
+         contig_end << contig_beg[n].to_i + "#{contigs[n]}".length.to_i - 1          
       end
 
       
@@ -98,9 +95,8 @@ class Convert
           for i in 0..contigs.length - 1
                   
 	      file.puts "#{[scaffold_id,contig_beg[i],contig_end[i]].join("\t")}"
-
-              gap_end =  posn[i].to_i + "#{gaps[i]}".length.to_i - 1      
-              file.puts "#{[scaffold_id,posn[i],gap_end].join("\t")}"
+      
+              file.puts "#{[scaffold_id,posn[i],gap_end[i]].join("\t")}"
               
           end
 	      
@@ -119,18 +115,8 @@ class Convert
       #puts contigs[0].length
       #puts gaps[0].length
       puts posn.inspect
-      
-
-      #puts "length of 1st gap: " + "#{posn[0]}" + " - " + "#{posn[0] + gaps[0].length - 1}"
-      #puts "length of 2nd gap: " + "#{posn[1]}" + " - " + "#{posn[1] + gaps[1].length - 1}"
-      #puts "length of 3rd gap: " + "#{posn[2]}" + " - " + "#{posn[2] + gaps[2].length - 1}"
-      #puts "length of 4th gap: " + "#{posn[3]}" + " - " + "#{posn[3] + gaps[3].length - 1}"
-      #puts "length of 5th gap: " + "#{posn[4]}" + " - " + "#{posn[4] + gaps[4].length - 1}"
-
-
-     
-      
-      
+      puts gap_end.inspect
+                   
  end
 
 
