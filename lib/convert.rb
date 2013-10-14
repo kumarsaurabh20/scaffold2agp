@@ -3,8 +3,7 @@ class Convert
 
 
  def file_read
-     
-     # variables
+    # variables
     version = "agp-version	2.0"
     organism = "Halochloris"
     tax_id = "2505"
@@ -69,7 +68,8 @@ class Convert
          gaps.each do |gap|
 
          posn << q.index(gap)
-         q = q.sub(gap, "*")
+         count = 
+         q = q.sub(gap, "N" * gap.length)
          end
 
          contigs.each do |con|
@@ -81,7 +81,7 @@ class Convert
 
          contig_id << "#{assembly_name}#{tax_id}"+"_" +"#{i}"
          n = i - 1
-         contig_end << contig_beg[n].to_i + "#{contigs[n]}".length.to_i
+         contig_end << contig_beg[n].to_i + "#{contigs[n]}".length.to_i - 1
           
       end
 
@@ -94,15 +94,23 @@ class Convert
          file.puts "# ASSEMBLY DATE: " + "#{assembly_date}"
          file.puts "# GENOME CENTER: " + "#{genome_center}"
          file.puts "# DESCRIPTION: "   + "#{description}"
-	      for i in 0..contigs.length + gaps.length    
+	      
+          for i in 0..contigs.length - 1
+                  
 	      file.puts "#{[scaffold_id,contig_beg[i],contig_end[i]].join("\t")}"
-	      end
+
+              gap_end =  posn[i].to_i + "#{gaps[i]}".length.to_i - 1      
+              file.puts "#{[scaffold_id,posn[i],gap_end].join("\t")}"
+              
+          end
+	      
       end
  
-      puts contig_id
+      #puts contig_id
+      #puts q
       #puts contigs
-      #puts contig_beg.inspect
-      #puts contig_end.inspect
+      puts contig_beg.inspect
+      puts contig_end.inspect
       #puts "The scaffold ID is: #{label}"
       #puts "The scaffold size is: #{w.length}"   
       #puts "#{scaffold_base_count}"
@@ -110,7 +118,7 @@ class Convert
       
       #puts contigs[0].length
       #puts gaps[0].length
-      #puts posn.inspect
+      puts posn.inspect
       
 
       #puts "length of 1st gap: " + "#{posn[0]}" + " - " + "#{posn[0] + gaps[0].length - 1}"
@@ -121,6 +129,7 @@ class Convert
 
 
      
+      
       
  end
 
