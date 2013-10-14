@@ -56,16 +56,16 @@ class Convert
 	#contigs.length # total number of contigs(elements)
 	#get individual contig length from here
 	 q = w.downcase
-         n_count = 0
-	 gaps = []
-	 scaffold_base_count = 0
+         #n_count = 0
+	 #gaps = []
+	 #scaffold_base_count = 0
          contig_id = []
          contig_beg = []
          contig_end = []  
          posn = []
          gap_end = []
    
-      #gaps = q.scan(/[n]+/)  #creates array of string that matches the pattern
+      gaps = q.scan(/[n]+/)  #creates array of string that matches the pattern
       q.scan(/[n]+/) do |gap|
          posn << q.index(gap)
 	 gap_end << "#{q.index(gap)}".to_i + "#{gap}".length.to_i - 1
@@ -77,9 +77,11 @@ class Convert
       end
 
       for i in 1..contigs.length 
-         contig_id << "#{assembly_name}#{tax_id}"+"_" +"#{i}"
-         n = i - 1
-         contig_end << contig_beg[n].to_i + "#{contigs[n]}".length.to_i - 1          
+         contig_id << "#{assembly_name}#{tax_id}"+"_" +"#{i}"     
+      end
+
+      for i in 0..contigs.length
+          contig_end << contig_beg[i].to_i + "#{contigs[i]}".length.to_i - 1 
       end
 
       
@@ -95,8 +97,10 @@ class Convert
           for i in 0..contigs.length - 1
                   
 	      file.puts "#{[scaffold_id,contig_beg[i],contig_end[i]].join("\t")}"
-      
-              file.puts "#{[scaffold_id,posn[i],gap_end[i]].join("\t")}"
+
+              diff = "#{gap_end[i]}".to_i - "#{posn[i]}".to_i      
+
+              file.puts "#{[scaffold_id,posn[i],gap_end[i]].join("\t")}" if diff > 10
               
           end
 	      
@@ -105,17 +109,17 @@ class Convert
       #puts contig_id
       #puts q
       #puts contigs
-      puts contig_beg.inspect
-      puts contig_end.inspect
+      #puts contig_beg.inspect
+      #puts contig_end.inspect
       #puts "The scaffold ID is: #{label}"
       #puts "The scaffold size is: #{w.length}"   
       #puts "#{scaffold_base_count}"
       #puts "#{n_count}"
       
       #puts contigs[0].length
-      #puts gaps[0].length
-      puts posn.inspect
-      puts gap_end.inspect
+      puts gaps
+      #puts posn.inspect
+      #puts gap_end.inspect       
                    
  end
 
