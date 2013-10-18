@@ -3,7 +3,7 @@ class Convert
 
 
  def file_read
-   # variables
+  # variables
     version = "agp-version	2.0"
     organism = "Halochloris"
     tax_id = "2505"
@@ -63,6 +63,7 @@ class Convert
          contig_end = []  
          posn = []
          gap_end = []
+         gap_diff = []
    
       gaps = q.scan(/nnnnnnnnnn+/)  #creates array of string that matches the pattern
       q.scan(/nnnnnnnnnnn+/) do |gap|
@@ -94,13 +95,12 @@ class Convert
          file.puts "# DESCRIPTION: "   + "#{description}"
 	      
           for i in 0..contigs.length - 1
-                  
-	      file.puts "#{[scaffold_id,contig_beg[i],contig_end[i]].join("\t")}"
 
-              diff = "#{gap_end[i]}".to_i - "#{posn[i]}".to_i      
+          gap_diff << "#{gap_end[i]}".to_i - "#{posn[i]}".to_i  + 1        
 
-              file.puts "#{[scaffold_id,posn[i],gap_end[i]].join("\t")}" if diff > 10
-              
+	  file.puts "#{[scaffold_id,contig_beg[i],contig_end[i], contig_id[i]].join("\t")}" + "\n" + "#{[scaffold_id,posn[i],gap_end[i], gap_diff[i]].join("\t")}"
+          #file.puts "#{[scaffold_id,posn[i],gap_end[i], i+2, gap_diff[i]].join("\t")}"  
+             
           end
 	      
       end
@@ -118,7 +118,8 @@ class Convert
       #puts contigs[0].length
       puts gaps
       #puts posn.inspect
-      #puts gap_end.inspect
+      #puts gap_end.inspect       
+      
  end
 
 
