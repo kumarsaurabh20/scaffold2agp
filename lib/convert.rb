@@ -3,8 +3,7 @@ class Convert
 
 
  def file_read
-    
-    # variables
+   # variables
     version = "agp-version	2.0"
     organism = "Halochloris"
     tax_id = "2505"
@@ -65,8 +64,8 @@ class Convert
          posn = []
          gap_end = []
    
-      gaps = q.scan(/[n]+/)  #creates array of string that matches the pattern
-      q.scan(/[n]+/) do |gap|
+      gaps = q.scan(/nnnnnnnnnn+/)  #creates array of string that matches the pattern
+      q.scan(/nnnnnnnnnnn+/) do |gap|
          posn << q.index(gap)
 	 gap_end << "#{q.index(gap)}".to_i + "#{gap}".length.to_i - 1
          q = q.sub(gap, "N" * gap.length)
@@ -119,8 +118,7 @@ class Convert
       #puts contigs[0].length
       puts gaps
       #puts posn.inspect
-      #puts gap_end.inspect       
-                   
+      #puts gap_end.inspect
  end
 
 
