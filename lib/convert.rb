@@ -3,7 +3,8 @@ class Convert
 
 
  def file_read
-  # variables
+ 
+    # variables
     version = "agp-version	2.0"
     organism = "Halochloris"
     tax_id = "2505"
@@ -93,14 +94,20 @@ class Convert
          file.puts "# ASSEMBLY DATE: " + "#{assembly_date}"
          file.puts "# GENOME CENTER: " + "#{genome_center}"
          file.puts "# DESCRIPTION: "   + "#{description}"
-	      
+	  
+          n = 0    
           for i in 0..contigs.length - 1
 
           gap_diff << "#{gap_end[i]}".to_i - "#{posn[i]}".to_i  + 1        
-
-	  file.puts "#{[scaffold_id,contig_beg[i],contig_end[i], contig_id[i]].join("\t")}" + "\n" + "#{[scaffold_id,posn[i],gap_end[i], gap_diff[i]].join("\t")}"
-          #file.puts "#{[scaffold_id,posn[i],gap_end[i], i+2, gap_diff[i]].join("\t")}"  
-             
+          
+          n = n + 1          
+ 
+	  file.puts "#{[scaffold_id,contig_beg[i],contig_end[i], n,contig_id[i]].join("\t")}" 
+          
+          file.puts "#{[scaffold_id,posn[i],gap_end[i], n+1, gap_diff[i]].join("\t")}" 
+                    
+          n = n + 1
+   
           end
 	      
       end
