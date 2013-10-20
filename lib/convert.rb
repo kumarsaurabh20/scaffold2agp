@@ -1,10 +1,8 @@
 require 'fileCheck'
 class Convert
 
-
  def file_read
  
-    
     # variables
     version = "agp-version	2.0"
     organism = "Halochloris"
@@ -135,7 +133,7 @@ class Convert
       #puts "#{n_count}"
       
       #puts contigs[0].length
-      puts gaps
+      #puts gaps
       #puts posn.inspect
       #puts gap_end.inspect       
       
