@@ -1,7 +1,95 @@
 require 'fileCheck'
 class Convert
 
- def file_read
+  VERSION = "agp-version	2.0"
+  ASSEMBLY_DATE = Date.new(2013,10,13)
+  COMPONENT_BEG = "1"
+  COMPONENT_TYPE_GAP = "N"
+
+  attr_accessor :contigs, :contig_id, :contig_beg, :contig_end, :posn, :gap_end, :gap_diff, :organism, :tax_id, 
+                :assembly_name, :genome_center, :description, :scaffold_id, :orientation
+
+
+  def initialize()
+         @contig_id   = []
+         @contig_beg  = []
+         @contig_end  = []  
+         @posn        = []
+         @gap_end     = []
+         @gap_diff    = [] 
+         @orientation = []
+  end
+
+  def user_input(args={})
+       @organism      = args[:organism]      || ""
+       @tax_id        = args[:tax_id]        || ""
+       @assembly_name = args[:assembly_name] || ""
+       @genome_center = args[:genome_center] || ""
+       @description   = args[:description]   || ""
+       @scaffold_id   = args[:scaffold_id]   || ""
+  end
+
+
+
+  def start!
+     intro       
+	     result = nil
+	     until result == :quit
+             
+
+
+	     end
+     conclusion
+  end
+
+  def get_action
+      print "scaffold2agp>> "
+      puts "Name the organism? "
+      organism = gets.chomp
+      puts "taxonomy id of the organism? "
+      taxonomy = gets.chomp
+      puts "Assembly name? "
+      ass_name = gets.chomp
+      puts "Genome center? "
+      gen_center = gets.chomp
+      puts "Any description?(optional) "
+      desc = gets.chomp
+      puts "scaffold_id? "
+      scaf_id = gets.chomp
+  end
+
+  def intro
+     puts  " "
+     puts  " "
+     print "  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n"
+     puts  "*                                                                              *"
+     print "*                       Welcome to scaffold2agp program                        *\n"
+     print "* An interactive Ruby program to convert scaffold file in fasta in to .agp file*\n"
+     puts  "*                                                                              *"
+     puts  "*                                                                              *"
+     print "  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n"
+     puts  " "
+     puts  " "
+ end
+
+ def conclusion
+     puts "\n\n        ### Goodbye and Thank you for using scaffold2agp!!!! ###\n\n"
+     puts  "                       Kumar Saurabh Singh                             "
+     puts  "                     kumarsaurabh20@gmail.com                          "
+     puts  "                   ############################                        "
+ end
+
+
+
+
+
+
+
+
+
+
+
+  def file_read
  
     # variables
     version = "agp-version	2.0"
