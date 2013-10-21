@@ -28,7 +28,7 @@ class FileCheck
   end
 
   def self.read_file
-      file = IO.readlines(@@filepath) unless file_exists?
+      file = IO.readlines('mira_output_contiguator_scaffold.fasta') unless file_exist?
       return file
   end
 

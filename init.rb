@@ -7,5 +7,6 @@ $:.unshift(File.join(APP_ROOT, 'lib'))
 require 'convert'
 
 convert = Convert.new
+convert.start!
 
 

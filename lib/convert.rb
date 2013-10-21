@@ -1,20 +1,24 @@
 require 'fileCheck'
+require 'date'
 class Convert
 
-  VERSION = "agp-version	2.0"
-  ASSEMBLY_DATE = Date.new(2013,10,13)
-  COMPONENT_BEG = "1"
-  COMPONENT_TYPE_GAP = "N"
+ VERSION = "agp-version	2.0"
+ ASSEMBLY_DATE = Date.new(2013,10,13)
+ COMPONENT_BEG = "1"
+ COMPONENT_TYPE_CONTIG = "D"
+ COMPONENT_TYPE_GAP = "N"
+ GAP_TYPE = "fragment"
+ LINKAGE = "No"
 
-  attr_accessor :contigs, :contig_id, :contig_beg, :contig_end, :posn, :gap_end, :gap_diff, :organism, :tax_id, 
-                :assembly_name, :genome_center, :description, :scaffold_id, :orientation
+ attr_accessor :contig_id, :contig_beg, :contig_end, :gap_start, :gap_end, :gap_diff, :organism, :tax_id, 
+               :assembly_name, :genome_center, :description, :scaffold_id, :orientation, :label
 
 
   def initialize()
          @contig_id   = []
          @contig_beg  = []
          @contig_end  = []  
-         @posn        = []
+         @gap_start   = []
          @gap_end     = []
          @gap_diff    = [] 
          @orientation = []
@@ -29,47 +33,151 @@ class Convert
        @scaffold_id   = args[:scaffold_id]   || ""
   end
 
-
-
   def start!
      intro       
 	     result = nil
-	     until result == :quit
-             
-
-
-	     end
+	     until result == :quit 
+                  print "scaffold2agp>> "           
+                   args = get_action
+                   user_input(args)
+                   output = break_scaffold
+                   @label = output.shift
+                   contigs = output.shift
+                   contig_string = output.shift.to_s
+                   contigs_string_downcase = output.to_s
+                   print_file(contigs, contig_string, contigs_string_downcase)                                      
+             end
      conclusion
   end
 
   def get_action
-      print "scaffold2agp>> "
+      args = {}
+
       puts "Name the organism? "
-      organism = gets.chomp
+      args[:organism] = gets.chomp
+
+      print "scaffold2agp>> "
       puts "taxonomy id of the organism? "
-      taxonomy = gets.chomp
+      args[:tax_id] = gets.chomp
+
+      print "scaffold2agp>> "
       puts "Assembly name? "
-      ass_name = gets.chomp
+      args[:assembly_name] = gets.chomp
+
+      print "scaffold2agp>> "
       puts "Genome center? "
-      gen_center = gets.chomp
+      args[:genome_center] = gets.chomp
+
+      print "scaffold2agp>> "
       puts "Any description?(optional) "
-      desc = gets.chomp
-      puts "scaffold_id? "
-      scaf_id = gets.chomp
+      args[:description] = gets.chomp
+
+      print "scaffold2agp>> "
+      puts "Scaffold ID? "
+      args[:scaffold_id] = gets.chomp
+
+      return args
   end
 
+  def test_orientation
+        orientation = []
+
+	     file = IO.readlines('contiguator_orientation_output_sample.txt')  
+	     file.each do |element|     
+		     if element.include?("rep")
+			orientation << "-" 
+		     else  
+			orientation << "+"
+		     end
+	     end
+	return orientation
+   end
+
+  def break_scaffold
+
+      file = FileCheck.read_file
+      label = file.shift
+      join_file_elements = file.join()
+      contig_string = join_file_elements.delete "\n"
+      contigs = contig_string.split(/[N]+/)
+      contigs_string_downcase = contig_string.downcase
+      
+      return label, contigs, contig_string, contigs_string_downcase
+  end
+
+  def print_file(contigs, contig_string, contigs_string_downcase)
+      gap_start = []
+
+      #gaps = q.scan(/nnnnnnnnnn+/)  #creates array of string that matches the pattern
+      contigs_string_downcase.scan(/nnnnnnnnnn+/) do |gap|
+         @gap_start << contigs_string_downcase.index(gap)
+	 @gap_end << "#{contigs_string_downcase.index(gap)}".to_i + "#{gap}".length.to_i - 1
+         contigs_string_downcase = contigs_string_downcase.sub(gap, "N" * gap.length)
+      end
+
+      contigs.each do |con|
+      	@contig_beg << contig_string.index(con)
+      end
+
+      for i in 1..contigs.length 
+         @contig_id << "#{@assembly_name}#{@tax_id}"+"_" +"#{i}"     
+      end
+
+      for i in 0..contigs.length
+          @contig_end << @contig_beg[i].to_i + "#{contigs[i]}".length.to_i - 1 
+      end
+
+      
+      File.open('output.agp', 'a') do |file|
+
+         file.puts "##" + "#{VERSION}"
+         file.puts "# ORGANISM: "      + "#{@organism}"
+         file.puts "# TAX ID: "        + "#{@tax_id}"
+         file.puts "# ASSEMBLY NAME: " + "#{@assembly_name}"
+         file.puts "# ASSEMBLY DATE: " + "#{ASSEMBLY_DATE}"
+         file.puts "# GENOME CENTER: " + "#{@genome_center}"
+         file.puts "# DESCRIPTION: "   + "#{@description}"
+	  
+          n = 0    
+          for i in 0..contigs.length - 1
+         
+          orientation = test_orientation 
+         
+          @gap_diff << "#{@gap_end[i]}".to_i - "#{@gap_start[i]}".to_i  + 1 
+          component_end = "#{contigs[i]}".length.to_i + 1       
+          
+          n = n + 1          
+ 
+	  file.puts "#{[scaffold_id,contig_beg[i],contig_end[i], n, COMPONENT_TYPE_CONTIG, contig_id[i], COMPONENT_BEG, component_end, orientation[i] ].join("\t")}" 
+          
+          file.puts "#{[@scaffold_id, @gap_start[i], @gap_end[i], n+1, COMPONENT_TYPE_GAP, @gap_diff[i], GAP_TYPE, LINKAGE].join("\t")}" unless contigs[i] == contigs.last
+                    
+          n = n + 1
+   
+          end
+	      
+      end
+    
+     conclude
+
+  end
+
+
+private
+
+
   def intro
-     puts  " "
-     puts  " "
-     print "  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n"
-     puts  "*                                                                              *"
-     print "*                       Welcome to scaffold2agp program                        *\n"
-     print "* An interactive Ruby program to convert scaffold file in fasta in to .agp file*\n"
-     puts  "*                                                                              *"
-     puts  "*                                                                              *"
-     print "  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n"
-     puts  " "
-     puts  " "
+      puts  " "
+      puts  " "
+      print "  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n"
+      puts  "*                                                                              *"
+      print "*                       Welcome to scaffold2agp program                        *\n"
+      print "* An interactive Ruby program to convert scaffold file in fasta in to .agp file*\n"
+      puts  "*                                                                              *"
+      puts  "*                                                                              *"
+      print "  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n"
+      puts  " "
+      puts  " "
  end
 
  def conclusion
@@ -79,157 +187,8 @@ class Convert
      puts  "                   ############################                        "
  end
 
-
-
-
-
-
-
-
-
-
-
-  def file_read
- 
-    # variables
-    version = "agp-version	2.0"
-    organism = "Halochloris"
-    tax_id = "2505"
-    assembly_name = "HALO"
-    assembly_date = Date.new(2013,10,13)
-    genome_center = "NCBI"
-    description = "extremophile gamma proteobacterium"
-    scaffold_id = "HALO_scaffold1"
-
-
-    object = "" #identifier for object being assembled
-    object_beg = "" #starting corrdinates of the component/gap on the object in column one
-    object_end = "" #ending corrdinates of the component/gap on the object in column one
-    part_number = "" #line count for the component/gaps that make up the object in column one
-    component_type_contig = "D" #Sequencing status of the component[A=Active finishing, D=draft HTG, F=finished HTG]
-                        #[G=whole genome finishing, N=gap with specified size, O=other sequence, P=predraft]
-                        #[U=gap of unknown size, W=WGS contig]
-    component_type_gap = "N"
-    component_id = "" #if comp_type is !=N, this is a unique identifier for the sequence component
-                      #contributing in the object in col one. 
-    gap_length = "" #If comp_type is = N. The length of gap
-
-                          
-    gap_type = "fragment" #if col_type=N The combination of gap type and linkage indicates weather the gap is captured or not
-                  #In some cases gaps types are assigned biological values
-                  #fragment:gap btn two contigs, clone:gap btn two clone that do not overlap, contig:gap btn clone 
-                  #cotig also called "layout gap", centromere:a gap inserted for centromere, short_arm:gap 
-                  #inserted at the start of an acrocentric chromosome.
-                  #Hetrochromatin:a gap inserted for an especially large region of heterochromatic sequence(may also)
-                  #include centromere. Telomere:a gap inserted for telomere, repeat:an unresolve repeat 
-
-
-
-     linkage = "No" #if col_type=N, indicates if there is evidence of linkage betn the adjacent lines values:yes or No
-
-     orientation = "" #if col_type!= N, specifies orientation of component relative to object on col one +/-
-
-
-
-        x = IO.readlines('mira_output_contiguator_scaffold.fasta')
-	#x.class #Array
-	label = x.shift
-	
-
-        y = x.join()
-	#y.class #String
-	w = y.delete "\n"
-	contigs = w.split(/[N]+/)
-	#contigs.class #array
-	#contigs.length # total number of contigs(elements)
-	#get individual contig length from here
-	 q = w.downcase
-         #n_count = 0
-	 #gaps = []
-	 #scaffold_base_count = 0
-         contig_id = []
-         contig_beg = []
-         contig_end = []  
-         posn = []
-         gap_end = []
-         gap_diff = []
-         component_beg = "1" #if col_type != N, represents beg of part of the component seq that contributes to the object
-        component_end = []  #if col_type!=N end part of component contributing in object in col one
-   
-      gaps = q.scan(/nnnnnnnnnn+/)  #creates array of string that matches the pattern
-      q.scan(/nnnnnnnnnn+/) do |gap|
-         posn << q.index(gap)
-	 gap_end << "#{q.index(gap)}".to_i + "#{gap}".length.to_i - 1
-         q = q.sub(gap, "N" * gap.length)
-      end
-
-      contigs.each do |con|
-      	contig_beg << w.index(con)
-      end
-
-      for i in 1..contigs.length 
-         contig_id << "#{assembly_name}#{tax_id}"+"_" +"#{i}"     
-      end
-
-      for i in 0..contigs.length
-          contig_end << contig_beg[i].to_i + "#{contigs[i]}".length.to_i - 1 
-      end
-
-      
-      File.open("test.agp", "a") do |file|
-         file.puts "##" + "#{version}"
-         file.puts "# ORGANISM: "      + "#{organism}"
-         file.puts "# TAX ID: "        + "#{tax_id}"
-         file.puts "# ASSEMBLY NAME: " + "#{assembly_name}"
-         file.puts "# ASSEMBLY DATE: " + "#{assembly_date}"
-         file.puts "# GENOME CENTER: " + "#{genome_center}"
-         file.puts "# DESCRIPTION: "   + "#{description}"
-	  
-          n = 0    
-          for i in 0..contigs.length - 1
-
-          gap_diff << "#{gap_end[i]}".to_i - "#{posn[i]}".to_i  + 1 
-          component_end = "#{contigs[i]}".length.to_i + 1       
-          
-          n = n + 1          
- 
-	  file.puts "#{[scaffold_id,contig_beg[i],contig_end[i], n, component_type_contig, contig_id[i], component_beg, component_end ].join("\t")}" 
-          
-          file.puts "#{[scaffold_id,posn[i],gap_end[i], n+1, component_type_gap, gap_diff[i], gap_type, linkage].join("\t")}" unless contigs[i] == contigs.last
-                    
-          n = n + 1
-   
-          end
-	      
-      end
-
-     #last_line = 0
-     #file = File.open("test.agp", 'r+')
-     #file.each {  last_line = file.pos unless file.eof? }
-     #file.seek(last_line, IO::SEEK_SET)
-     #file.print " "
-     #file.close
- 
-      #puts contig_id
-      #puts q
-      #puts contigs
-      #puts contig_beg.inspect
-      #puts contig_end.inspect
-      #puts "The scaffold ID is: #{label}"
-      #puts "The scaffold size is: #{w.length}"   
-      #puts "#{scaffold_base_count}"
-      #puts "#{n_count}"
-      
-      #puts contigs[0].length
-      #puts gaps
-      #puts posn.inspect
-      #puts gap_end.inspect       
-      
+ def conclude
+     puts "File has successfully written. Check the root folder!!!"
  end
-
-
-
-
-
 
 end
