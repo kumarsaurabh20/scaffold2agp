@@ -2,6 +2,11 @@ require 'fileCheck'
 require 'date'
 class Convert
 
+     class Config
+           @@actions = ['convert','help','quit']
+           def self.actions; @@actions; end  
+     end
+
  VERSION = "agp-version	2.0"
  ASSEMBLY_DATE = Date.new(2013,10,13)
  COMPONENT_BEG = "1"
@@ -24,7 +29,7 @@ class Convert
          @orientation = []
   end
 
-  def user_input(args={})
+  def agp_defaults(args={})
        @organism      = args[:organism]      || ""
        @tax_id        = args[:tax_id]        || ""
        @assembly_name = args[:assembly_name] || ""
@@ -37,49 +42,79 @@ class Convert
      intro       
 	     result = nil
 	     until result == :quit 
-                  print "scaffold2agp>> "           
-                   args = get_action
-                   user_input(args)
-                   output = break_scaffold
-                   @label = output.shift
-                   contigs = output.shift
-                   contig_string = output.shift.to_s
-                   contigs_string_downcase = output.to_s
-                   print_file(contigs, contig_string, contigs_string_downcase)                                      
+                  action = get_action
+                  result = do_action(action)                                                                
              end
      conclusion
   end
 
   def get_action
+      action = nil
+	 until Convert::Config.actions.include?(action)
+	      puts "Actions" + Convert::Config.actions.join(",") if action
+	      print "scaffold2agp->> "
+	      user_input = gets.chomp
+	      action = user_input.downcase.strip
+	 end
+    return action      
+  end
+
+  def user_input
       args = {}
 
       puts "Name the organism? "
       args[:organism] = gets.chomp
 
-      print "scaffold2agp>> "
       puts "taxonomy id of the organism? "
       args[:tax_id] = gets.chomp
 
-      print "scaffold2agp>> "
       puts "Assembly name? "
       args[:assembly_name] = gets.chomp
 
-      print "scaffold2agp>> "
       puts "Genome center? "
       args[:genome_center] = gets.chomp
 
-      print "scaffold2agp>> "
       puts "Any description?(optional) "
       args[:description] = gets.chomp
 
-      print "scaffold2agp>> "
       puts "Scaffold ID? "
       args[:scaffold_id] = gets.chomp
 
       return args
   end
 
-  def test_orientation
+  def do_action(actions)
+
+      case actions
+   
+      when "convert"
+            conversion
+
+      when "help"
+           help
+
+      when "quit"
+           return :quit
+
+      else
+         puts "undefined action. Check again!!"
+      end
+
+
+  end
+
+  def conversion
+      args = user_input
+      agp_defaults(args)
+      output = break_scaffold
+      @label = output.shift
+      contigs = output.shift
+      contig_string = output.shift.to_s
+      contigs_string_downcase = output.to_s
+      print_file(contigs, contig_string, contigs_string_downcase) 
+  end
+
+  def get_orientation
         orientation = []
 
 	     file = IO.readlines('contiguator_orientation_output_sample.txt')  
@@ -141,7 +176,7 @@ class Convert
           n = 0    
           for i in 0..contigs.length - 1
          
-          orientation = test_orientation 
+          orientation = get_orientation 
          
           @gap_diff << "#{@gap_end[i]}".to_i - "#{@gap_start[i]}".to_i  + 1 
           component_end = "#{contigs[i]}".length.to_i + 1       
@@ -164,6 +199,10 @@ class Convert
 
 
 private
+
+  def help
+      puts "Coming Soon!!"
+  end
 
 
   def intro
@@ -188,7 +227,7 @@ private
  end
 
  def conclude
-     puts "File has successfully written. Check the root folder!!!"
+     puts "File has been successfully written. Check the root folder!!!"
  end
 
 end
