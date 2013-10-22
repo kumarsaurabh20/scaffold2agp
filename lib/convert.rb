@@ -19,7 +19,7 @@ class Convert
                :assembly_name, :genome_center, :description, :scaffold_id, :orientation, :label
 
 
-  def initialize()
+  def initialize
          @contig_id   = []
          @contig_beg  = []
          @contig_end  = []  
@@ -51,7 +51,7 @@ class Convert
   def get_action
       action = nil
 	 until Convert::Config.actions.include?(action)
-	      puts "Actions" + Convert::Config.actions.join(",") if action
+	      puts "Actions: " + Convert::Config.actions.join(", ") if action
 	      print "scaffold2agp->> "
 	      user_input = gets.chomp
 	      action = user_input.downcase.strip
@@ -62,22 +62,22 @@ class Convert
   def user_input
       args = {}
 
-      puts "Name the organism? "
+      print "Name the organism?(agp constant): "
       args[:organism] = gets.chomp
 
-      puts "taxonomy id of the organism? "
+      print "Taxonomy id of the organism?(agp constant): "
       args[:tax_id] = gets.chomp
 
-      puts "Assembly name? "
+      print "Assembly name?(agp constant): "
       args[:assembly_name] = gets.chomp
 
-      puts "Genome center? "
+      print "Genome center?(agp constant): "
       args[:genome_center] = gets.chomp
 
-      puts "Any description?(optional) "
+      print "Any description?(agp constant): "
       args[:description] = gets.chomp
 
-      puts "Scaffold ID? "
+      print "Scaffold ID?(Object_id e.g. Scaffold_HALO_1): "
       args[:scaffold_id] = gets.chomp
 
       return args
@@ -117,8 +117,9 @@ class Convert
   def get_orientation
         orientation = []
 
-	     file = IO.readlines('contiguator_orientation_output_sample.txt')  
-	     file.each do |element|     
+	     #file = IO.readlines('contiguator_orientation_output_sample.txt') 
+	     file = FileCheck.read_mapped_file
+             file.each do |element|     
 		     if element.include?("rep")
 			orientation << "-" 
 		     else  
@@ -130,7 +131,8 @@ class Convert
 
   def break_scaffold
 
-      file = FileCheck.read_file
+      #file = FileCheck.read_fasta_file
+      file = FileCheck.read_fasta_file
       label = file.shift
       join_file_elements = file.join()
       contig_string = join_file_elements.delete "\n"

@@ -2,7 +2,7 @@ A ruby based interactive command line application to convert fasta formatted sca
 
 It requires a fasta file having scaffold(single scaffold assembled from mapped contigs) with gaps separating contigs. Gaps could be of fixed length or variable. The app also requires a CONTIGuator generated mapped contigs file for fetching +/- contig orientation information. 
 
-Cyrrently the program only accepts single scaffold file. This limitation would be resolved in future versions of the program. 
+Currently the program only accepts single scaffold file. This limitation would be resolved in future versions of the program. 
 
 Just initialize the init.rb file and get your .agp file ready for NCBI submissions.  
 

@@ -1,0 +1,6 @@
+halochloris_c3		57864
+halochloris_rep_c125	2480
+halochloris_c72		12801
+halochloris_c19		77609
+halochloris_rep_c156	1079
+halochloris_rep_c154	2715
