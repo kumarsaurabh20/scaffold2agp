@@ -1,7 +1,7 @@
 class FileCheck
 
  def self.file_exist?
-       if @file_fasta && File.exists?(@@file_fasta) 
+       if @@file_fasta && File.exists?(@@file_fasta) 
           return true
        else
           return false

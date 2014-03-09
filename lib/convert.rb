@@ -12,8 +12,8 @@ class Convert
  COMPONENT_BEG = "1"
  COMPONENT_TYPE_CONTIG = "D"
  COMPONENT_TYPE_GAP = "N"
- GAP_TYPE = "fragment"
- LINKAGE = "No"
+ GAP_TYPE = "scaffold"
+ LINKAGE = "yes"
 
  attr_accessor :contig_id, :contig_beg, :contig_end, :gap_start, :gap_end, :gap_diff, :organism, :tax_id, 
                :assembly_name, :genome_center, :description, :scaffold_id, :orientation, :label
@@ -147,13 +147,13 @@ class Convert
 
       #gaps = q.scan(/nnnnnnnnnn+/)  #creates array of string that matches the pattern
       contigs_string_downcase.scan(/nnnnnnnnnn+/) do |gap|
-         @gap_start << contigs_string_downcase.index(gap)
+         @gap_start << contigs_string_downcase.index(gap) 
 	 @gap_end << "#{contigs_string_downcase.index(gap)}".to_i + "#{gap}".length.to_i - 1
          contigs_string_downcase = contigs_string_downcase.sub(gap, "N" * gap.length)
       end
 
-      contigs.each do |con|
-      	@contig_beg << contig_string.index(con)
+      contigs.each do |con|    
+	        @contig_beg << contigs_string_downcase.index(con.downcase)
       end
 
       for i in 1..contigs.length 
@@ -161,11 +161,11 @@ class Convert
       end
 
       for i in 0..contigs.length
-          @contig_end << @contig_beg[i].to_i + "#{contigs[i]}".length.to_i - 1 
+          @contig_end << @contig_beg[i].to_i + "#{contigs[i]}".length.to_i - 1
       end
 
       
-      File.open('output.agp', 'a') do |file|
+      File.open('halochloris.agp', 'a') do |file|
 
          file.puts "##" + "#{VERSION}"
          file.puts "# ORGANISM: "      + "#{@organism}"
@@ -180,14 +180,14 @@ class Convert
          
           orientation = get_orientation 
          
-          @gap_diff << "#{@gap_end[i]}".to_i - "#{@gap_start[i]}".to_i  + 1 
-          component_end = "#{contigs[i]}".length.to_i + 1       
+          @gap_diff << "#{@gap_end[i]}".to_i - "#{@gap_start[i]}".to_i + 1
+          component_end = "#{contigs[i]}".length.to_i      
           
           n = n + 1          
  
 	  file.puts "#{[scaffold_id,contig_beg[i],contig_end[i], n, COMPONENT_TYPE_CONTIG, contig_id[i], COMPONENT_BEG, component_end, orientation[i] ].join("\t")}" 
           
-          file.puts "#{[@scaffold_id, @gap_start[i], @gap_end[i], n+1, COMPONENT_TYPE_GAP, @gap_diff[i], GAP_TYPE, LINKAGE].join("\t")}" unless contigs[i] == contigs.last
+          file.puts "#{[@scaffold_id, @gap_start[i], @gap_end[i], n+1, COMPONENT_TYPE_GAP, @gap_diff[i], GAP_TYPE, LINKAGE, 'align_genus'].join("\t")}" unless contigs[i] == contigs.last
                     
           n = n + 1
    
